@@ -7,10 +7,11 @@ class App extends React.Component {
   constructor(props) {
     super(props);
 
-    this.handleDeleteOptions = this.handleDeleteOptions.bind(this);
-    this.handlePick = this.handlePick.bind(this);
-    this.handleAddOption = this.handleAddOption.bind(this);
-    this.state = {};
+    this.handleDeleteEdEx = this.handleDeleteEdEx.bind(this);
+    this.handleAddEdEx = this.handleAddEdEx.bind(this);
+    this.state = {
+      choice: ["PersonalInformation", "Experience", "Education"],
+    };
   }
 
   handlePick() {
@@ -21,33 +22,28 @@ class App extends React.Component {
     console.log(this.state.random);
   }
 
-  handleDeleteOptions() {
-    this.setState(() => {
-      return {
-        options: [],
-      };
-    });
-  }
-
-  handleAddOption(option) {
-    if (!option) {
-      return "Enter valid value to add item.";
-    } else if (this.state.options.indexOf(option) > -1) {
-      return "This option already exists";
-    }
-
+  handleAddEdEx(chosen) {
     this.setState((prevState) => {
       return {
-        options: prevState.options.concat(option),
+        choice: prevState.choice.concat(chosen).sort().reverse(),
       };
     });
   }
+
   render() {
     return (
       <div>
-        <CvSection title="Personal Information" category="personalInformation" />
-        <CvSection title="Experience"  category="experience"/>
-        <CvSection title="Education" category="education" />
+        {this.state.choice.map((element, index) => {
+          return (
+            <CvSection
+              key={index}
+              title={element}
+              category={element}
+              callBackFromParent={this.handleAddEdEx}
+              callBackDeleteFromParent={this.handleDeleteEdEx}
+            />
+          );
+        })}
       </div>
     );
   }
@@ -56,8 +52,11 @@ class App extends React.Component {
 class CvSection extends React.Component {
   constructor(props) {
     super(props);
+
+    this.handleAddEdEx = this.handleAddEdEx.bind(this);
+
     this.state = {
-      personalInformation: [
+      PersonalInformation: [
         "First Name",
         "Last Name",
         "Title",
@@ -66,26 +65,32 @@ class CvSection extends React.Component {
         "Email",
         "Description",
       ],
-      experience: ["Position", "Company", "City", "From", "To"],
-      education: ["University Name", "City", "Degree", "Major", "From", "To"],
+      Experience: ["Position", "Company", "City", "From", "To"],
+      Education: ["University Name", "City", "Degree", "Major", "From", "To"],
     };
+  }
+
+  handleAddEdEx(e) {
+    let targetName = e.target.id;
+    this.props.callBackFromParent(targetName);
   }
 
   render() {
     return (
       <div>
         <h1>{this.props.title}</h1>
-        {
-        this.state[this.props.category].map((element, index) => {
-          return <AddField key = {index} cvField={element} />;
+        {this.state[this.props.category].map((element, index) => {
+          return <AddField key={index} cvField={element} />;
         })}
 
-        {this.props.title!=="Personal Information" && (
-        <div>
-          <button>Add</button>
-          <button>Delete</button>
-        </div>)}
-       
+        {this.props.title !== "PersonalInformation" && (
+          <div>
+            <button id={this.props.category} onClick={this.handleAddEdEx}>
+              Add
+            </button>
+            <button>Delete</button>
+          </div>
+        )}
       </div>
     );
   }
@@ -94,21 +99,9 @@ class CvSection extends React.Component {
 class AddField extends React.Component {
   constructor(props) {
     super(props);
-    this.handleAddField = this.handleAddField.bind(this);
-    this.state = {
-      error: undefined,
-    };
+    this.state = {};
   }
-  handleAddField(e) {
-    e.preventDefault();
-    const option = e.target.elements.option.value.trim();
 
-    const error = this.props.handleAddField(option);
-
-    this.setState(() => {
-      return { error };
-    });
-  }
   render() {
     return (
       <div>
