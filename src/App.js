@@ -7,123 +7,218 @@ class App extends React.Component {
   constructor(props) {
     super(props);
 
-    this.handleDeleteOptions = this.handleDeleteOptions.bind(this);
-    this.handlePick = this.handlePick.bind(this);
-    this.handleAddOption = this.handleAddOption.bind(this);
+    this.handleAddItemParent = this.handleAddItemParent.bind(this);
+    this.myParentCallBack = this.myParentCallBack.bind(this);
+    this.myParentDeleteItem = this.myParentDeleteItem.bind(this);
+
+    this.state = {
+      personal: {
+        FirstName: "",
+        LastName: "",
+        Address: "",
+        PhoneNumber: "",
+      },
+
+      education: [
+        {
+          FirstName: "",
+          LastName: "",
+          Address: "",
+          PhoneNumber: "",
+        },
+      ],
+      experience: [[]],
+    };
+  }
+
+  myParentCallBack(infoProperty, infoValue) {
+    console.log(infoProperty, infoValue);
+    /* this.setState((prevState) =>
+    {
+     return prevState.personal[infoProperty]= infoValue;
+    })*/
+    let newProperty = { ...this.state.personal };
+    newProperty.FirstName = infoValue;
+    this.setState({ personal: newProperty });
+  }
+
+  handleAddItemParent(blankData, edOrEx) {
+    if (edOrEx == "education") {
+      this.setState((prevState) => {
+        return { education: prevState.education.concat(blankData) };
+      });
+    } else if (edOrEx=="experience") {
+      this.setState((prevState) => {
+        return { experience: prevState.experience.concat(blankData) };
+      });
+    }
+    /*
+    this.setState(previousState => ({
+      myArray: [...previousState.myArray, 'new value']
+  }));*/
+  }
+  render() {
+    return (
+      <div>
+        <PersonalInformation
+          title="Personal Information"
+          callBackFromParent={this.myParentCallBack}
+        />
+        <h2>Education</h2>
+
+        {this.state.education.map((element, index) => {
+          return <Education content={this.state.education} id={index} subject="education"/>;
+        })}
+        <AddButton
+          handleAddItemProp={this.handleAddItemParent}
+          subject="education"
+        />
+        <h2>Experience</h2>
+
+        {this.state.experience.map((element, index) => {
+          return <Experience content={this.state.experience} id={index} subject="experience"/>;
+        })}
+        <AddButton
+          handleAddItemProp={this.handleAddItemParent}
+          subject="experience"
+        />
+        <RenderedPersonal content={this.state.personal} />
+      </div>
+    );
+  }
+}
+
+export default App;
+
+class AddButton extends React.Component {
+  constructor(props) {
+    super(props);
+    this.handleAddItem = this.handleAddItem.bind(this);
+  }
+
+  handleAddItem() {
+    let newItem = {};
+    let subject = this.props.subject;
+
+    this.props.handleAddItemProp(newItem, subject);
+  }
+
+  render() {
+    return <button onClick={this.handleAddItem}>Add</button>;
+  }
+}
+
+class PersonalInformation extends React.Component {
+  constructor(props) {
+    super(props);
+    this.setPersonalInfo = this.setPersonalInfo.bind(this);
+
+    this.state = {
+      fields: ["First Name", "Last Name", "Address", "Phone Number"],
+    };
+  }
+
+  setPersonalInfo(e) {
+    let personalInfoData = e.target.value;
+    let personalInfoId = e.target.id;
+
+    this.props.callBackFromParent(personalInfoId, personalInfoData);
+    //console.log(e.target.value);
+    //console.log(e.target.id);
+  }
+  render() {
+    return (
+      <div>
+        <h2>{this.props.title}</h2>
+
+        {this.state.fields.map((element, index) => {
+          return (
+            <div key={index}>
+              <label>{element}</label>
+              <input
+                type="text"
+                onChange={this.setPersonalInfo}
+                id={element.replace(/\s/g, "")}
+              />
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+}
+
+class RenderedPersonal extends React.Component {
+  constructor(props) {
+    super(props);
     this.state = {};
   }
 
-  handlePick() {
-    const randomOption =
-      this.state.options[Math.floor(Math.random() * this.state.options.length)];
-    console.log(randomOption);
-    this.state.random = randomOption;
-    console.log(this.state.random);
-  }
-
-  handleDeleteOptions() {
-    this.setState(() => {
-      return {
-        options: [],
-      };
-    });
-  }
-
-  handleAddOption(option) {
-    if (!option) {
-      return "Enter valid value to add item.";
-    } else if (this.state.options.indexOf(option) > -1) {
-      return "This option already exists";
-    }
-
-    this.setState((prevState) => {
-      return {
-        options: prevState.options.concat(option),
-      };
-    });
-  }
   render() {
     return (
       <div>
-        <CvSection title="Personal Information" category="personalInformation" />
-        <CvSection title="Experience"  category="experience"/>
-        <CvSection title="Education" category="education" />
+        <h2>
+          Name: {this.props.content.FirstName} {this.props.content.LastName}{" "}
+        </h2>
       </div>
     );
   }
 }
 
-class CvSection extends React.Component {
+class Experience extends React.Component {
   constructor(props) {
-    super(props);
+    super();
+    this.handleDeleteItem=this.handleDeleteItem.bind(this);
     this.state = {
-      personalInformation: [
-        "First Name",
-        "Last Name",
-        "Title",
-        "Address",
-        "Phone Number",
-        "Email",
-        "Description",
-      ],
-      experience: ["Position", "Company", "City", "From", "To"],
-      education: ["University Name", "City", "Degree", "Major", "From", "To"],
+      fields: ["University", "Degree", "Major", "From", "To"],
     };
   }
 
+  handleDeleteItem(e){
+console.log(this.props.id, this.props.subject);
+//this.props.passItemToDeleteToParent(this.props.id);
+  }
   render() {
     return (
       <div>
-        <h1>{this.props.title}</h1>
-        {
-        this.state[this.props.category].map((element, index) => {
-          return <AddField key = {index} cvField={element} />;
+        {this.state.fields.map((element, index) => {
+          return (
+            <div key={index}>
+              <label>{element}</label>
+              <input type="text" />
+            </div>
+          );
         })}
-
-        {this.props.title!=="Personal Information" && (
-        <div>
-          <button>Add</button>
-          <button>Delete</button>
-        </div>)}
-       
+        <button onClick={this.handleDeleteItem}>Delete</button>
       </div>
     );
   }
 }
-
-class AddField extends React.Component {
+class Education extends React.Component {
   constructor(props) {
-    super(props);
-    this.handleAddField = this.handleAddField.bind(this);
+    super();
+    this.handleDeleteItem=this.handleDeleteItem.bind(this);
     this.state = {
-      error: undefined,
+      fields: ["Title", "Company", "Address", "From", "To"],
     };
   }
-  handleAddField(e) {
-    e.preventDefault();
-    const option = e.target.elements.option.value.trim();
-
-    const error = this.props.handleAddField(option);
-
-    this.setState(() => {
-      return { error };
-    });
-  }
+  handleDeleteItem(e){
+    console.log(this.props.id, this.props.subject);
+    //this.props.passItemToDeleteToParent(this.props.id);
+      }
   render() {
     return (
       <div>
-        {this.state.error && <p>{this.state.error}</p>}
-        <form>
-          <label>
-            <span>{this.props.cvField}</span>
-            <input type="text" name="option" />
-          </label>
-        </form>
+        {this.state.fields.map((element, index) => {
+          return (
+            <div key={index}>
+              <label>{element}</label>
+              <input type="text" />
+            </div>
+          );
+        })}
+        <button onClick={this.handleDeleteItem}>Delete</button>
       </div>
     );
   }
 }
-
-class AddSection extends React.Component {}
-
-export default App;
