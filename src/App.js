@@ -31,6 +31,21 @@ class App extends React.Component {
     };
   }
 
+  myParentDeleteItem(index, edOrEx){
+    console.log(index);
+
+    if (edOrEx == "education") {
+      this.setState((prevState) => {
+        return { education: prevState.education.filter((_, i) => i !== index)
+        };
+      });
+    } else if (edOrEx=="experience") {
+      this.setState((prevState) => {
+        return { experience: prevState.experience.filter((_, i) => i !== index)}
+        });
+    }
+  }
+
   myParentCallBack(infoProperty, infoValue) {
     console.log(infoProperty, infoValue);
     /* this.setState((prevState) =>
@@ -63,11 +78,16 @@ class App extends React.Component {
         <PersonalInformation
           title="Personal Information"
           callBackFromParent={this.myParentCallBack}
+          
         />
         <h2>Education</h2>
 
         {this.state.education.map((element, index) => {
-          return <Education content={this.state.education} id={index} subject="education"/>;
+          return <Education
+           content={this.state.education} 
+           id={index} subject="education"      
+           handleDeleteItem={this.myParentDeleteItem}
+          />;
         })}
         <AddButton
           handleAddItemProp={this.handleAddItemParent}
@@ -76,11 +96,16 @@ class App extends React.Component {
         <h2>Experience</h2>
 
         {this.state.experience.map((element, index) => {
-          return <Experience content={this.state.experience} id={index} subject="experience"/>;
+          return <Experience
+           content={this.state.experience} 
+           id={index} subject="experience"           
+           handleDeleteItem={this.myParentDeleteItem}
+          />;
         })}
         <AddButton
           handleAddItemProp={this.handleAddItemParent}
           subject="experience"
+
         />
         <RenderedPersonal content={this.state.personal} />
       </div>
@@ -175,8 +200,8 @@ class Experience extends React.Component {
   }
 
   handleDeleteItem(e){
-console.log(this.props.id, this.props.subject);
-//this.props.passItemToDeleteToParent(this.props.id);
+//console.log(this.props.id, this.props.subject);
+this.props.handleDeleteItem(this.props.id, this.props.subject);
   }
   render() {
     return (
@@ -203,8 +228,8 @@ class Education extends React.Component {
     };
   }
   handleDeleteItem(e){
-    console.log(this.props.id, this.props.subject);
-    //this.props.passItemToDeleteToParent(this.props.id);
+   // console.log(this.props.id, this.props.subject);
+    this.props.handleDeleteItem(this.props.id, this.props.subject);
       }
   render() {
     return (
@@ -212,7 +237,7 @@ class Education extends React.Component {
         {this.state.fields.map((element, index) => {
           return (
             <div key={index}>
-              <label>{element}</label>
+              <label>{element}{this.props.id}</label>
               <input type="text" />
             </div>
           );
