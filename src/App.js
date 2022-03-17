@@ -10,50 +10,75 @@ class App extends React.Component {
     this.handleAddItemParent = this.handleAddItemParent.bind(this);
     this.myParentCallBack = this.myParentCallBack.bind(this);
     this.myParentDeleteItem = this.myParentDeleteItem.bind(this);
+    this.myParentHandleExperienceInput =
+      this.myParentHandleExperienceInput.bind(this);
+    this.myParentHandleEducationInput =
+      this.myParentHandleEducationInput.bind(this);
 
     this.state = {
       personal: {
-        FirstName: "",
+        /*   FirstName: "",
         LastName: "",
         Address: "",
-        PhoneNumber: "",
+        PhoneNumber: "",*/
       },
 
-      education: [
-        {
-          FirstName: "",
-          LastName: "",
-          Address: "",
-          PhoneNumber: "",
-        },
+      education: [{}],
+      experience: [
+     {}
       ],
-      experience: [[]],
+      experienceData: {},
     };
   }
 
-  myParentDeleteItem(index, edOrEx){
+  myParentHandleExperienceInput(data, tempProp, index) {
+    let newProperty = { ...this.state.experience };
+
+    newProperty[index][tempProp] = data;
+
+  
+    return {experience: newProperty};
+
+    //console.log(this.state);
+    /* this.setState((prevState) => {
+      return { experience: prevState.experience.filter((_, i) => i !== index)
+      };
+    });*/
+  }
+
+  myParentHandleEducationInput(data, tempProp, index) {
+    let newProperty = { ...this.state.education };
+
+    newProperty[index][tempProp] = data;
+
+    return { education: newProperty };
+
+
+  }
+
+  myParentDeleteItem(index, edOrEx) {
     console.log(index);
 
     if (edOrEx == "education") {
       this.setState((prevState) => {
-        return { education: prevState.education.filter((_, i) => i !== index)
+        return { education: prevState.education.filter((_, i) => i !== index) };
+      });
+    } else if (edOrEx == "experience") {
+      this.setState((prevState) => {
+        return {
+          experience: prevState.experience.filter((_, i) => i !== index),
         };
       });
-    } else if (edOrEx=="experience") {
-      this.setState((prevState) => {
-        return { experience: prevState.experience.filter((_, i) => i !== index)}
-        });
     }
   }
 
   myParentCallBack(infoProperty, infoValue) {
-    console.log(infoProperty, infoValue);
     /* this.setState((prevState) =>
     {
      return prevState.personal[infoProperty]= infoValue;
     })*/
     let newProperty = { ...this.state.personal };
-    newProperty.FirstName = infoValue;
+    newProperty[infoProperty] = infoValue;
     this.setState({ personal: newProperty });
   }
 
@@ -62,7 +87,7 @@ class App extends React.Component {
       this.setState((prevState) => {
         return { education: prevState.education.concat(blankData) };
       });
-    } else if (edOrEx=="experience") {
+    } else if (edOrEx == "experience") {
       this.setState((prevState) => {
         return { experience: prevState.experience.concat(blankData) };
       });
@@ -78,36 +103,63 @@ class App extends React.Component {
         <PersonalInformation
           title="Personal Information"
           callBackFromParent={this.myParentCallBack}
-          
         />
         <h2>Education</h2>
 
         {this.state.education.map((element, index) => {
-          return <Education
-           content={this.state.education} 
-           id={index} subject="education"      
-           handleDeleteItem={this.myParentDeleteItem}
-          />;
+          return (
+            <Education
+              content={this.state.education}
+              id={index}
+              key={element}
+              subject="education"
+              handleDeleteItem={this.myParentDeleteItem}
+              callBackFromParentEducation={this.myParentHandleEducationInput}
+            />
+          );
         })}
         <AddButton
           handleAddItemProp={this.handleAddItemParent}
           subject="education"
         />
         <h2>Experience</h2>
-
-        {this.state.experience.map((element, index) => {
-          return <Experience
-           content={this.state.experience} 
-           id={index} subject="experience"           
-           handleDeleteItem={this.myParentDeleteItem}
-          />;
+        {this.state.experience.map((__, index) => {
+          return (
+            <Experience
+              content={this.state.experience[index]}
+              id={index}
+              key={index}
+              subject="experience"
+              handleDeleteItem={this.myParentDeleteItem}
+              callBackFromParentExperience={this.myParentHandleExperienceInput}
+            />
+          );
         })}
         <AddButton
           handleAddItemProp={this.handleAddItemParent}
           subject="experience"
-
         />
+
         <RenderedPersonal content={this.state.personal} />
+       
+       
+       
+        {this.state.experience.map((element, index) => (
+          <RenderedExperience
+            key={index}
+            id={index}
+            content={this.state.experience[index]}
+          />
+         
+        ))}
+                {this.state.education.map((element, index) =>{ return (
+          <RenderedEducation
+            key={index}
+            id={index}
+            content={this.state.education[index]}
+          />
+         
+        )})}
       </div>
     );
   }
@@ -182,9 +234,50 @@ class RenderedPersonal extends React.Component {
   render() {
     return (
       <div>
-        <h2>
-          Name: {this.props.content.FirstName} {this.props.content.LastName}{" "}
-        </h2>
+        <h2>First: {this.props.content.FirstName} </h2>
+        <h2> Last: {this.props.content.LastName}</h2>
+        <p>Address: {this.props.content.Address}</p>
+        <p>Phone: {this.props.content.PhoneNumber}</p>
+      </div>
+    );
+  }
+}
+
+class RenderedExperience extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    console.log(this.props);
+
+    return (
+      <div>
+        <h2>Title:{this.props.content.Title}</h2>
+        <p>Company:{this.props.content.Company} </p>
+        <p>From: {this.props.content.From} </p>
+        <p>To: {this.props.content.To}</p>
+      </div>
+    );
+  }
+}
+
+class RenderedEducation extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    console.log(this.props)
+
+    return (
+      <div>
+        <h2>Degree:{this.props.content.Degree}</h2>
+        <p>University:{this.props.content.University} </p>
+        <p>Address: {this.props.content.Address} </p>
+        <p>From: {this.props.content.From}</p>
+        <p>To: {this.props.content.To}</p>
+
       </div>
     );
   }
@@ -192,16 +285,29 @@ class RenderedPersonal extends React.Component {
 
 class Experience extends React.Component {
   constructor(props) {
-    super();
-    this.handleDeleteItem=this.handleDeleteItem.bind(this);
+    super(props);
+    this.handleDeleteItem = this.handleDeleteItem.bind(this);
+    this.handleExperienceInfo = this.handleExperienceInfo.bind(this);
     this.state = {
-      fields: ["University", "Degree", "Major", "From", "To"],
+      fields: ["Title", "Company", "From", "To"],
     };
+
   }
 
-  handleDeleteItem(e){
-//console.log(this.props.id, this.props.subject);
-this.props.handleDeleteItem(this.props.id, this.props.subject);
+  handleDeleteItem(e) {
+    this.props.handleDeleteItem(this.props.id, this.props.subject);
+  }
+
+  handleExperienceInfo(e) {
+    let experienceInfoData = e.target.value;
+    let experienceInfoElement = e.target.id;
+    let indexOfExperience = this.props.id;
+
+    this.props.callBackFromParentExperience(
+      experienceInfoData,
+      experienceInfoElement,
+      indexOfExperience
+    );
   }
   render() {
     return (
@@ -209,8 +315,16 @@ this.props.handleDeleteItem(this.props.id, this.props.subject);
         {this.state.fields.map((element, index) => {
           return (
             <div key={index}>
-              <label>{element}</label>
-              <input type="text" />
+              <label>{element}
+              {this.props.id}
+              </label>
+              <input
+                id={element}
+                type="text"
+                onChange={this.handleExperienceInfo}
+
+                value={this.props.content[element]}
+              />
             </div>
           );
         })}
@@ -221,24 +335,42 @@ this.props.handleDeleteItem(this.props.id, this.props.subject);
 }
 class Education extends React.Component {
   constructor(props) {
-    super();
-    this.handleDeleteItem=this.handleDeleteItem.bind(this);
+    super(props);
+    this.handleDeleteItem = this.handleDeleteItem.bind(this);
+    this.handleEducationInfo = this.handleEducationInfo.bind(this);
+
     this.state = {
-      fields: ["Title", "Company", "Address", "From", "To"],
+      fields: ["Degree", "University", "Address", "From", "To"],
     };
   }
-  handleDeleteItem(e){
-   // console.log(this.props.id, this.props.subject);
+  handleDeleteItem(e) {
     this.props.handleDeleteItem(this.props.id, this.props.subject);
-      }
+  }
+  handleEducationInfo(e) {
+    let educationInfoData = e.target.value;
+    let educationInfoElement = e.target.id;
+    let indexOfEducation = this.props.id;
+console.log(educationInfoData, educationInfoElement, indexOfEducation);
+    this.props.callBackFromParentEducation(
+      educationInfoData,
+      educationInfoElement,
+      indexOfEducation
+
+    );
+  }
   render() {
     return (
       <div>
         {this.state.fields.map((element, index) => {
           return (
             <div key={index}>
-              <label>{element}{this.props.id}</label>
-              <input type="text" />
+              <label>
+                {element}
+                {this.props.id}
+              </label>
+              <input 
+              id={element}
+              onChange={this.handleEducationInfo} type="text" />
             </div>
           );
         })}
